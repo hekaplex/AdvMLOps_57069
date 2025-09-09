@@ -1,0 +1,20 @@
+
+# The DLT pipeline for my_project.
+resources:
+  pipelines:
+    my_project_pipeline:
+      name: my_project_pipeline
+      target: my_project_${bundle.environment}
+      clusters:
+        - label: default
+          policy_id: 001EAFFD1AB1E114
+          num_workers: 1
+        - label: maintenance
+          policy_id: 001EAFFD1AB1E114
+      libraries:
+        - notebook:
+            path: ../src/dlt_pipeline.ipynb
+
+      configuration:
+        bundle.sourcePath: ${workspace.file_path}/src
+            

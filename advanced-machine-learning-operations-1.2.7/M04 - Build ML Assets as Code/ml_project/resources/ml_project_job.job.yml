@@ -1,0 +1,71 @@
+resources:
+  jobs:
+    ml_project_job:
+      name: ml_project_job
+      schedule:
+        pause_status: PAUSED
+        quartz_cron_expression: 44 37 8 * * ?
+        timezone_id: Europe/Amsterdam
+      tasks:
+      - existing_cluster_id: ${var.cluster_id_var}
+        notebook_task:
+          notebook_path: /Workspace/Users/labuser10141814_1757436385@vocareum.com/advanced-machine-learning-operations-1.2.7/M04
+            - Build ML Assets as Code/ml_project/src/data_cleaning_notebook
+        task_key: data_cleaning
+      - depends_on:
+        - task_key: data_cleaning
+        existing_cluster_id: ${var.cluster_id_var}
+        notebook_task:
+          notebook_path: /Workspace/Users/labuser10141814_1757436385@vocareum.com/advanced-machine-learning-operations-1.2.7/M04
+            - Build ML Assets as Code/ml_project/src/data_transformation
+        task_key: data_transformation
+      - depends_on:
+        - task_key: data_transformation
+        existing_cluster_id: ${var.cluster_id_var}
+        notebook_task:
+          notebook_path: /Workspace/Users/labuser10141814_1757436385@vocareum.com/advanced-machine-learning-operations-1.2.7/M04
+            - Build ML Assets as Code/ml_project/src/feature_engineering
+        task_key: feature_engineering
+      - condition_task:
+          left: '{{tasks.feature_engineering.values.feature_engineering_status}}'
+          op: EQUAL_TO
+          right: SUCCESS
+        depends_on:
+        - task_key: feature_engineering
+        task_key: conditional_execution
+      - depends_on:
+        - outcome: 'true'
+          task_key: conditional_execution
+        existing_cluster_id: ${var.cluster_id_var}
+        notebook_task:
+          notebook_path: /Workspace/Users/labuser10141814_1757436385@vocareum.com/advanced-machine-learning-operations-1.2.7/M04
+            - Build ML Assets as Code/ml_project/src/train_model
+        task_key: train_model
+        timeout_seconds: 600
+      - depends_on:
+        - outcome: 'false'
+          task_key: conditional_execution
+        existing_cluster_id: ${var.cluster_id_var}
+        spark_python_task:
+          parameters:
+          - -e
+          - 'NonExistentColumn: Column not found in the dataset'
+          python_file: /Workspace/Users/labuser10141814_1757436385@vocareum.com/advanced-machine-learning-operations-1.2.7/M04
+            - Build ML Assets as Code/ml_project/src/task_failed.py
+        task_key: Task_Failed
+      - depends_on:
+        - task_key: train_model
+        existing_cluster_id: ${var.cluster_id_var}
+        notebook_task:
+          notebook_path: /Workspace/Users/labuser10141814_1757436385@vocareum.com/advanced-machine-learning-operations-1.2.7/M04
+            - Build ML Assets as Code/ml_project/src/evaluate_model
+        task_key: evaluate_model
+        timeout_seconds: 600
+      - depends_on:
+        - task_key: evaluate_model
+        existing_cluster_id: ${var.cluster_id_var}
+        spark_python_task:
+          python_file: /Workspace/Users/labuser10141814_1757436385@vocareum.com/advanced-machine-learning-operations-1.2.7/M04
+            - Build ML Assets as Code/ml_project/src/read_output.py
+        task_key: read_output
+        timeout_seconds: 600

@@ -1,0 +1,31 @@
+
+# The main job for my_project.
+resources:
+  jobs:
+    my_project_job:
+      name: my_project_job
+
+      schedule:
+        # Run every day at 8:37 AM
+        quartz_cron_expression: '44 37 8 * * ?'
+        timezone_id: Europe/Amsterdam
+
+      tasks:
+        - task_key: notebook_task
+          existing_cluster_id: 0909-164710-ivtimpoa
+          notebook_task:
+            notebook_path: ../src/notebook.ipynb
+        
+        - task_key: refresh_pipeline
+          depends_on:
+            - task_key: notebook_task
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.my_project_pipeline.id}
+        
+        - task_key: main_task
+          depends_on:
+            - task_key: refresh_pipeline
+          existing_cluster_id: 0909-164710-ivtimpoa
+          spark_python_task:
+            python_file: "../src/my_project/main.py"
+            

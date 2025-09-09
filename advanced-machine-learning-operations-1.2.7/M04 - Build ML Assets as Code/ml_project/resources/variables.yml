@@ -1,0 +1,7 @@
+variables:
+  cluster_id_var:
+    default: 0909-164710-ivtimpoa
+    description: Your cluster ID
+  username_var:
+    default: ${workspace.current_user.userName}
+    description: Your username
