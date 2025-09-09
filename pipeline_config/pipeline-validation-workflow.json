@@ -1,0 +1,139 @@
+
+{
+  "name": "Demo Pipeline Validation Workflow with Conditional Execution - 2025-09-09",
+  "email_notifications": {
+    "on_failure": [
+      "labuser10141814_1757436385@vocareum.com"
+    ],
+    "on_success": [
+      "labuser10141814_1757436385@vocareum.com"
+    ]
+  },
+  "tasks": [
+    {
+      "task_key": "data_cleaning",
+      "notebook_task": {
+        "notebook_path": "/Users/labuser10141814_1757436385@vocareum.com/advanced-machine-learning-operations-1.2.7/M01 - Streamlining MLOps with Databricks/1.1 Demo - Pipeline workflow notebooks/01_data_transformation/data_cleaning",
+        "source": "WORKSPACE"
+      },
+      "existing_cluster_id": "0909-164710-ivtimpoa",
+      "timeout_seconds": 600,
+      "run_if": "ALL_SUCCESS",
+      "email_notifications": {
+        "on_success": [
+          "labuser10141814_1757436385@vocareum.com"
+        ]
+      }
+    },
+    {
+      "task_key": "data_transformation",
+      "depends_on": [{"task_key": "data_cleaning"}],
+      "notebook_task": {
+        "notebook_path": "/Users/labuser10141814_1757436385@vocareum.com/advanced-machine-learning-operations-1.2.7/M01 - Streamlining MLOps with Databricks/1.1 Demo - Pipeline workflow notebooks/01_data_transformation/data_transformation",
+        "source": "WORKSPACE"
+      },
+      "existing_cluster_id": "0909-164710-ivtimpoa",
+      "timeout_seconds": 600,
+      "run_if": "ALL_SUCCESS",
+      "email_notifications": {
+        "on_success": [
+          "labuser10141814_1757436385@vocareum.com"
+        ]
+      }
+    },
+    {
+      "task_key": "feature_engineering",
+      "depends_on": [{"task_key": "data_transformation"}],
+      "notebook_task": {
+        "notebook_path": "/Users/labuser10141814_1757436385@vocareum.com/advanced-machine-learning-operations-1.2.7/M01 - Streamlining MLOps with Databricks/1.1 Demo - Pipeline workflow notebooks/02_model_training/feature_engineering_incorrect",
+        "source": "WORKSPACE"
+      },
+      "existing_cluster_id": "0909-164710-ivtimpoa",
+      "timeout_seconds": 600,
+      "run_if": "ALL_SUCCESS",
+      "email_notifications": {
+        "on_success": [
+          "labuser10141814_1757436385@vocareum.com"
+        ]
+      }
+    },
+    {
+      "task_key": "conditional_execution",
+      "depends_on": [{"task_key": "feature_engineering"}],
+      "condition_task": {
+        "op": "EQUAL_TO",
+        "left": "{{tasks.feature_engineering.values.feature_engineering_status}}",
+        "right": "SUCCESS"
+      },
+      "timeout_seconds": 0,
+      "email_notifications": {}
+    },
+    {
+      "task_key": "train_model",
+      "depends_on": [{"task_key": "conditional_execution", "outcome": "true"}],
+      "notebook_task": {
+        "notebook_path": "/Users/labuser10141814_1757436385@vocareum.com/advanced-machine-learning-operations-1.2.7/M01 - Streamlining MLOps with Databricks/1.1 Demo - Pipeline workflow notebooks/02_model_training/train_model",
+        "source": "WORKSPACE"
+      },
+      "existing_cluster_id": "0909-164710-ivtimpoa",
+      "timeout_seconds": 600,
+      "run_if": "ALL_SUCCESS",
+      "base_parameters": {
+        "learning_rate": "0.01",
+        "max_depth": "5"
+      },
+      "email_notifications": {
+        "on_success": [
+          "labuser10141814_1757436385@vocareum.com"
+        ]
+      }
+    },
+    {
+      "task_key": "Task_Failed",
+      "depends_on": [{"task_key": "conditional_execution", "outcome": "false"}],
+      "spark_python_task": {
+        "python_file": "/Users/labuser10141814_1757436385@vocareum.com/advanced-machine-learning-operations-1.2.7/M01 - Streamlining MLOps with Databricks/1.1 Demo - Pipeline workflow notebooks/02_model_training/task_failed.py",
+        "parameters": [
+          "-e",
+          "NonExistentColumn: Column not found in the dataset"
+        ]
+      },
+      "existing_cluster_id": "0909-164710-ivtimpoa",
+      "timeout_seconds": 0,
+      "run_if": "ALL_SUCCESS",
+      "email_notifications": {}
+    },
+    {
+      "task_key": "evaluate_model",
+      "depends_on": [{"task_key": "train_model"}],
+      "notebook_task": {
+        "notebook_path": "/Users/labuser10141814_1757436385@vocareum.com/advanced-machine-learning-operations-1.2.7/M01 - Streamlining MLOps with Databricks/1.1 Demo - Pipeline workflow notebooks/03_model_evaluation/evaluate_model",
+        "source": "WORKSPACE"
+      },
+      "existing_cluster_id": "0909-164710-ivtimpoa",
+      "timeout_seconds": 600,
+      "run_if": "ALL_SUCCESS",
+      "email_notifications": {
+        "on_success": [
+          "labuser10141814_1757436385@vocareum.com"
+        ]
+      }
+    },
+    {
+      "task_key": "accuracy_check",
+      "depends_on": [{"task_key": "evaluate_model"}],
+      "notebook_task": {
+        "notebook_path": "/Users/labuser10141814_1757436385@vocareum.com/advanced-machine-learning-operations-1.2.7/M01 - Streamlining MLOps with Databricks/1.1 Demo - Pipeline workflow notebooks/03_model_evaluation/accuracy_check",
+        "source": "WORKSPACE"
+      },
+      "existing_cluster_id": "0909-164710-ivtimpoa",
+      "timeout_seconds": 600,
+      "run_if": "ALL_SUCCESS",
+      "email_notifications": {
+        "on_success": [
+          "labuser10141814_1757436385@vocareum.com"
+        ]
+      }
+    }
+  ]
+}
