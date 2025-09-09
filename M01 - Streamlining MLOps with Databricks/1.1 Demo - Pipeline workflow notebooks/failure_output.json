@@ -1,0 +1,13 @@
+{
+    "status": "failed",
+    "error_message": "Sample error: NonExistentColumn not found in input dataset",
+    "troubleshooting_steps": [
+        "- Verify that all column names used in the transformations exist in the input dataset.",
+        "- Check for typos in column names (e.g., 'NonExistentColumn').",
+        "- Ensure the input dataset contains the expected schema."
+    ],
+    "next_steps": [
+        "- Fix the identified issues in the notebook or input data.",
+        "- Re-run the pipeline after applying the fixes."
+    ]
+}
